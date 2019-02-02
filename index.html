@@ -1,0 +1,496 @@
+<!doctype html>
+<html>
+<head>
+  <title>Intro to Game Programming Game</title>
+  <style>
+    .screen {
+      width: 640px;
+      height: 480px;
+      color: black;
+      text-align: center;
+      line-height: 400px;
+    }
+  </style>
+</head>
+
+<body onload="main()">
+
+    <template id="menuTemplate">
+        <div class="screen">
+            <canvas width="640" height="480" id="canv"></canvas>
+        </div>
+        <div>
+            <button onclick="update({name:'play'})">Next</button>
+        </div>
+    </template>    
+
+  <template id="titleTemplate">
+    <div class="screen">
+      <canvas width="640" height="480" id="canv"></canvas>
+    </div>
+    <div>
+      <button onclick="update({name:'next'})">Next</button>
+    </div>
+  </template>
+
+  <template id="loadTemplate">
+    <div class="screen">
+      <div>Load Template</div>
+    </div>
+    <div>
+      <button onclick="update({name:'next'})">Next</button>
+    </div>
+  </template>
+
+  <template id="runTemplate">
+    <div class="screen">
+      <div>Run Template</div>
+    </div>
+    <div>
+      <button onclick="update({name:'next'})">Next</button>
+    </div>
+  </template>
+
+  <template id="endTemplate">
+    <div class="screen">
+      <div>End Template</div>
+    </div>
+    <div>
+      <button onclick="update({name:'next'})">Next</button>
+    </div>
+  </template>
+
+  <div id="templateHere"></div>
+
+  <script>
+    //View Code
+
+    var menuTemplate, titleTemplate, loadTemplate, runTemplate, endTemplate;
+    var templateHere;
+
+    function updateView() {
+      //Get initial values as needed
+      if (!menuTemplate)
+        menuTemplate = document.getElementById("menuTemplate");
+      if (!titleTemplate)
+        titleTemplate = document.getElementById("titleTemplate");
+      if (!loadTemplate)
+        loadTemplate = document.getElementById("loadTemplate");
+      if (!runTemplate)
+        runTemplate = document.getElementById("runTemplate");
+      if (!endTemplate)
+        endTemplate = document.getElementById("endTemplate");
+      if (!templateHere)
+        templateHere = document.getElementById("templateHere");
+
+      var clone;
+      if (state == MENU_STATE){
+        clone = menuTemplate.content.cloneNode(true);
+      }
+        else if (state == PLAY_STATE) {
+        clone = titleTemplate.content.cloneNode(true);
+      } else if (state == LOAD_STATE) {
+        clone = loadTemplate.content.cloneNode(true);
+      } else if (state == RUN_STATE) {
+        clone = runTemplate.content.cloneNode(true);
+      } else if (state == END_STATE) {
+        clone = endTemplate.content.cloneNode(true);
+      } else {
+        return console.log("ERROR: Couldn't match state " + state);
+      }
+
+      templateHere.innerHTML = "";
+      templateHere.appendChild(clone);
+    }
+
+  </script>
+
+  <script>
+    //Controls
+
+    function main() {
+      setInterval(timer, 1000 / 30);
+      updateView();
+    }
+
+    var updateListeners = [];
+
+    function timer() {
+      update({ name: "timer" })
+    }
+
+    function update(event) {
+      for (let i = 0; i < updateListeners.length; i++) {
+        updateListeners[i].eventPump(event);
+      }
+    }
+
+  </script>
+
+
+
+
+  <script>
+    //Model code
+
+
+
+    //A variable that has my state
+    //JS is dynamcially typed
+    var state;
+    var stateHandler;
+
+
+    //A set of states we can be in
+    var MENU_STATE = 1;
+    var PLAY_STATE = 2;
+    var LOAD_STATE = 3;
+    var RUN_STATE = 4;
+    var END_STATE = 5;
+
+    var MENU_SUB_STATE = "";
+
+    //Set our intital state
+    state = MENU_STATE;
+
+    var menuStateHandler = {
+        start() {
+        updateListeners.push(this);
+        this.rotation = 0;
+      },
+      eventPump(event) {
+        switch (event.name) {
+          case "play":
+            state = PLAY_STATE;
+            updateListeners.splice(updateListeners.indexOf(this), 1);
+            updateStateHandler();
+            break;
+          case "timer":
+            this.update();
+            break;
+        }
+      },
+      update() {
+        this.canvas = document.getElementById("canv");
+        this.ctx = this.canvas.getContext("2d");
+        this.width = 640;
+        this.height = 480;
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
+
+        this.rotation += .01;
+
+        let ctx = this.ctx;
+
+        ctx.fillStyle = "blue";
+        ctx.fillRect(0, 0, this.width, this.height);
+
+        //Often you want the center of the world (0,0) to be at the center of the screen.
+        //or at least to start there
+        ctx.translate(this.width / 2, this.height / 2);
+
+        //This is where we scale the world
+        ctx.scale(100, 100);
+        //We'll be in the world
+
+        var menuMargin = .1;
+
+        
+        //Menu Background
+        var menuBar = {
+            color: "orange",
+            dim: { w: 3, h: 4},
+            pos: { x: - 3 /2, y: - 4 / 2}
+        };
+
+        //Menu Header
+        var menuHeader = {
+            color: "green",
+            textColor: "black",
+            font: "1pt Helvetica",
+            dim: { w: menuBar.dim.w - .1 * menuBar.dim.w, h: menuBar.dim.h * .25},
+            pos: { x: menuBar.pos.x + menuBar.dim.w * (menuMargin / 2), y: menuBar.pos.y + menuBar.dim.h * (menuMargin / 2)},
+        };
+
+        console.log(menuHeader.pos.x);
+
+        //Menu Button
+        var menuButton = {
+            color: "yellow",
+            dim: { w: menuBar.dim.w - .1 * menuBar.dim.w, h: ((menuBar.dim.h * .5) / 3)},
+            pos: {x: 0, y: 0}
+        };
+
+        ctx.fillStyle = menuBar.color;
+        ctx.fillRect(menuBar.pos.x, menuBar.pos.y, menuBar.dim.w, menuBar.dim.h);
+
+        ctx.save() 
+        {
+            ctx.translate(0, 0);
+            ctx.fillStyle = menuHeader.color;
+            ctx.fillRect(menuHeader.pos.x, menuHeader.pos.y, menuHeader.dim.w, menuHeader.dim.h);
+
+            ctx.save() // Save so we can add Menu Header Text
+            {
+                ctx.translate(0 , menuHeader.pos.y);
+                ctx.scale(.25, .25);
+                ctx.textAlign = "center"; 
+                ctx.fillStyle = menuHeader.textColor;
+                ctx.font = menuHeader.font;
+                ctx.fillText("My Game", 0, 2.5);
+            }
+            ctx.restore();
+
+            var numButtons = 3;
+            var buttonText = ["Play", "Options", "Exit"];
+
+            ctx.translate(menuHeader.pos.x, menuHeader.pos.y + menuHeader.dim.h + (menuBar.dim.h *( menuMargin / 2)));
+
+            console.log("menuHeader.pos.y: " + menuHeader.pos.y);
+            for(var i = 0; i < numButtons; i++) {
+                
+                ctx.fillStyle = menuButton.color;
+                ctx.fillRect(menuButton.pos.x, menuButton.pos.y +  (i * menuBar.dim.h * .166666666666) + (i * menuBar.dim.h * (menuMargin / 2)), menuButton.dim.w, menuButton.dim.h);
+
+                ctx.save() // Save so we can add Menu Buttons
+                {
+                var maxTextWidth;
+            
+                //Put the text in position relative to the truck
+                //ctx.translate(0, 0);
+                ctx.scale(.25, .25);
+                //Draw the text
+                ctx.fillStyle = "black";
+                ctx.font = "1pt Helvetica";
+                //ctx.textAlign = "left";
+                ctx.textBaseline = "middle";
+                ctx.fillText("Play", -1, 0);
+                }
+            ctx.restore();
+            }    
+        }
+        ctx.restore();
+      }
+    };
+
+    var playStateHandler = {
+      start() {
+        updateListeners.push(this);
+        this.rotation = 0;
+      },
+      eventPump(event) {
+        switch (event.name) {
+          case "next":
+            state = LOAD_STATE;
+            updateListeners.splice(updateListeners.indexOf(this), 1);
+            updateStateHandler();
+            break;
+          case "timer":
+            this.update();
+            break;
+
+        }
+      },
+      update() {
+        this.canvas = document.getElementById("canv");
+        this.ctx = this.canvas.getContext("2d");
+        this.width = 640;
+        this.height = 480;
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
+
+        this.rotation += .01;
+
+        let ctx = this.ctx;
+
+        ctx.fillStyle = "blue";
+        ctx.fillRect(0, 0, this.width, this.height);
+
+
+        //Add models to a world with a camera that maps to a screen
+
+        //Here's the pattern
+        //You (scale and rotate) then move an object to place it in the next level in the hierarchy.
+        //You (scale and rotate) then move a model to place it in the world.
+        //You (scale and rotate) then move the world to place it in the camera.
+        //In code, you do this backwards.
+
+
+        // 3 things we can do
+        // Scale -> Make things bigger or smaller. Scale < 1 shrinks, > 1 inflates.
+        // Rotate -> Rotate
+        // Translate -> Move
+
+
+
+        
+
+        //Often you want the center of the world (0,0) to be at the center of the screen.
+        //or at least to start there
+        ctx.translate(this.width / 2, this.height / 2);
+        //This is where we scale the world
+        ctx.scale(100, 100);
+        //We'll be in the world
+
+
+        
+        //Car-carrying truck
+        //Draw this truck in the center of the camera
+        ctx.fillStyle = "orange";
+        ctx.fillRect(-3, -.5, 6, 1)
+
+        
+        ctx.save() //Save so we can add children to the truck
+        {
+
+          //Put the car in position relative to the truck
+          ctx.translate(1, -1);
+          ctx.scale(.5, .5);
+          //Draw the car
+          ctx.fillStyle = "red";
+          ctx.fillRect(-1, -.5, 2, 1);
+
+          ctx.save(); // Save so we can add children to the car
+          {
+            //Add a tire to the car 
+            //Put the tire in position relative to the car
+            ctx.translate(-1, .5);
+            ctx.scale(.25, .25);
+            ctx.rotate(this.rotation);
+            //Draw the tire
+            ctx.fillStyle = "black"
+            ctx.fillRect(-1, -1, 2, 2);
+
+          }
+          ctx.restore(); //Restore so we can add another child to the car if we want to
+
+          
+          ctx.save() // Save so we can add children to the car
+          {
+            ctx.translate(1, .5);
+            ctx.scale(.25, .25);
+            ctx.rotate(this.rotation);
+            ctx.fillStyle = "black"
+            ctx.fillRect(-1, -1, 2, 2);
+          }
+          ctx.restore();//Restore so we can add another child to the car if we want to
+
+        }
+        ctx.restore(); //Restore so we can add another child to the truck if we want to
+
+        ctx.save() //Save so we can add children to the truck
+        {
+
+          //Car (scale rotate) then translate
+          ctx.translate(-1, -1);
+          ctx.scale(.5, .5);
+          //Draw the car
+          ctx.fillStyle = "red";
+          ctx.fillRect(-1, -.5, 2, 1);
+
+
+          ctx.save(); // Save so we can add children to the car
+          {
+            //Add a tire to the car 
+            //Put the tire in position relative to the car
+            ctx.translate(-1, .5);
+            ctx.scale(.25, .25);
+            ctx.rotate(this.rotation);
+            ctx.fillStyle = "black"
+            ctx.fillRect(-1, -1, 2, 2);
+
+            ctx.restore(); //Restore so we can add another child to the car if we want to
+          }
+
+          
+          ctx.save() // Save so we can add children to the car
+          {
+            //Add a tire to the car 
+            //Put the tire in position relative to the car
+            ctx.translate(1, .5);
+            ctx.scale(.25, .25);
+            ctx.rotate(this.rotation);
+            ctx.fillStyle = "black"
+            ctx.fillRect(-1, -1, 2, 2);
+          }
+          ctx.restore();//Restore so we can add another child to the car if we want to
+        }
+        ctx.restore(); //Restore so we can add another child to the truck if we want to
+
+
+      }
+
+    };
+
+    var loadStateHandler = {
+      start() {
+        updateListeners.push(this);
+      },
+      eventPump(event) {
+        switch (event.name) {
+          case "next":
+            state = RUN_STATE;
+            updateListeners.splice(updateListeners.indexOf(this), 1);
+            updateStateHandler();
+            break;
+        }
+      }
+    };
+
+    var runStateHandler = {
+      start() {
+        updateListeners.push(this);
+      },
+      eventPump(event) {
+        switch (event.name) {
+          case "next":
+            state = END_STATE;
+            updateListeners.splice(updateListeners.indexOf(this), 1);
+            updateStateHandler();
+            break;
+        }
+      }
+    };
+
+    var endStateHandler = {
+      start() {
+        updateListeners.push(this);
+      },
+      eventPump(event) {
+        switch (event.name) {
+          case "next":
+            state = MENU_STATE;
+            updateListeners.splice(updateListeners.indexOf(this), 1);
+            updateStateHandler();
+            break;
+        }
+      }
+    };
+
+
+
+
+
+    updateStateHandler();
+
+    function updateStateHandler() {
+      if (state == MENU_STATE) {
+        stateHandler = menuStateHandler;
+      } else if (state == PLAY_STATE) {
+        stateHandler = playStateHandler;
+      } else if (state == LOAD_STATE) {
+        stateHandler = loadStateHandler;
+      } else if (state == RUN_STATE) {
+        stateHandler = runStateHandler;
+      } else if (state == END_STATE) {
+        stateHandler = endStateHandler;
+      }
+
+
+      updateView();
+      stateHandler.start();
+    }
+  </script>
+</body>
+
+</html>
