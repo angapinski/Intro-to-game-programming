@@ -1,0 +1,124 @@
+<!doctype html>
+<html>
+<head>
+  <title>Intro to Game Programming Game</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body onload="main()" onkeydown="keydown(event)" onKeyUp="keyup(event)">
+  <canvas width="640" height="640" id="canv" onmousedown="mousedown(event)" onmouseup="mouseup(event)" onmousemove="mousemove(event)"
+  onwheel="wheel(event)"></canvas>
+
+  
+
+  <!-- Game Engine Code -->
+  <script src="Classes/vector2.js"></script>
+  <script src="Classes/transform.js"></script>
+  <script src="Classes/gameObject.js"></script>
+
+  <script src="StateHandlers/menuStateHandler.js"></script>
+  <script src="StateHandlers/loadStateHandler.js"></script>
+  <script src="StateHandlers/playStateHandler.js"></script>
+  <script src="StateHandlers/endStateHandler.js"></script>
+  <script src="StateHandlers/updateStateHandler.js"></script>
+  <script src="StateHandlers/eventHandler.js"></script>
+
+  <script src="Util/interfaceSupport.js"></script>
+
+  <script src="options.js"></script>
+  <script src="Model/character.js"></script>
+  <script src="Model/obstacle.js"></script>
+  <script src="Model/scoreBox.js"></script>
+  <script src="Model/scoreText.js"></script>
+  <script src="Model/deathMessage.js"></script>
+  <script src="Model/highScoreMessage.js"></script>
+  <script src="Model/continueMessage.js"></script>
+  <script src="Model/menu.js"></script>
+  <script src="Model/title.js"></script>
+  <script src="Model/menuButton.js"></script>
+  <script src="Model/menuButtonText.js"></script>
+  <script src="Model/loadingBar.js"></script>
+  <script src="Model/loadingMessage.js"></script>
+
+  <script>
+    var state;
+    var stateHandler;
+
+    //A set of states we can be in
+    var MENU_STATE = 1;
+    var LOAD_STATE = 2;
+    var PLAY_STATE = 3;
+    var END_STATE = 4;
+
+    var MENU_SUB_STATE = "";
+
+    //Set our intital state
+    state = MENU_STATE;
+
+    //Initial Position Values
+    //MOVE TO MODEL
+    var startingTruckPos = -3;
+    var currentTruckPos = 0;
+
+    var Time = {}                                     //Stores information about time that is available to our game
+    var msBetweenFrames = 1000/frameRate;                //Time in milliseconds between frames
+    Time.deltaTime = msBetweenFrames/1000;        //Time in seconds between frames.
+
+    //Setup the canvas variables
+    var width = 640;
+    var height = 640;
+    var canvas = document.getElementById("canv");
+    var ctx = canvas.getContext("2d");
+
+    canvas.width = width;
+    canvas.height = height;
+
+    function main() {
+      updateStateHandler();                 //Load the current scene in our state machine
+      
+      setInterval(timer, msBetweenFrames);  //Start the main timer to be called 30 times a second (every 33.3ms)
+      //timer();
+      //requestAnimationFrame(main);
+    }
+  </script>
+
+  <script>
+    //Model code
+      //Menu Margin in percentage of menu bar
+      var menuMargin = .1;
+      
+      //Menu Background
+       var menuBar = {
+            color: "orange",
+            dim: { w: 3, h: 4},
+            pos: { x: - 3 /2, y: - 4 / 2}
+        };
+
+        //Menu Header
+        var menuHeader = {
+            color: "green",
+            textColor: "black",
+            font: "1pt Helvetica",
+            dim: { w: menuBar.dim.w - .1 * menuBar.dim.w, h: menuBar.dim.h * .25},
+            pos: { x: menuBar.pos.x + menuBar.dim.w * (menuMargin / 2), y: menuBar.pos.y + menuBar.dim.h * (menuMargin / 2)},
+        };
+
+        var menuHeaderText = "My Game";
+
+        //Menu Button
+        var menuButton = {
+            color: "yellow",
+            dim: { w: menuBar.dim.w - .1 * menuBar.dim.w, h: ((menuBar.dim.h * .5) / 3)},
+            pos: {x: 0, y: 0}
+        };
+
+        var numButtons = 3;
+        var buttonText = ["Play", "Options", "Exit"];
+
+
+    var leftMax = -3.2;
+    var rightMax = 3.2;
+  </script>
+</body>
+
+</html>
