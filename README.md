@@ -1,1 +1,1 @@
-# Intro-to-game-programming
+# Whirly Bird Javascript Browser Game
